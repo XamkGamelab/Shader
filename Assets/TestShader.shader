@@ -18,8 +18,8 @@ Shader"Custom/TestShader"
 
         HLSLPROGRAM
 
-        #pragma vertex Vert
-        #pragma fragment Frag
+        #pragma vertex VertexFunction
+        #pragma fragment FragmentFunction
 
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/core.hlsl"
 
@@ -29,10 +29,11 @@ Shader"Custom/TestShader"
             float3 normalOS : NORMAL;
         };
 
-        struct Varyings
+        struct Varyings // Or use v2f, whichever you find intuitive in the future.
         {
             float4 positionHCS : SV_POSITION;
             float3 positionWS : TEXCOORD0;
+
         };
 
         CBUFFER_START(UnityPerMaterial)
@@ -40,18 +41,24 @@ Shader"Custom/TestShader"
         CBUFFER_END
 
 
-        Varyings Vert(const Attributes input)
+        Varyings VertexFunction(const Attributes input)
         {
             Varyings output;
             output.positionHCS = TransformObjectToHClip(input.positionOS);
-            output.positionWS = TransformObjectToWorld(input.positionOS);
+            //output.positionWS = TransformObjectToWorld(input.positionOS);
+            
+            // In world coordinates = changes when rotated
+            output.positionWS = TransformObjectToWorldNormal(input.normalOS);
+
+            // In own coordinates = doesn't change when rotated
+            //output.positionWS = input.normalOS;
             return output;
         }
 
-        float4 Frag(const Varyings input) : SV_Target
+        float4 FragmentFunction(const Varyings input) : SV_Target
         {
-    return _Color * clamp(input.positionWS.x, 0, 1);
-
+            return _Color * float4((input.positionWS.x + 1) / 2, (input.positionWS.y + 1) / 2, (input.positionWS.z + 1) / 2, 1);
+            //return _Color * clamp(input.positionWS.x, 0, 1);
         }
 
 
