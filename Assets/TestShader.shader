@@ -57,8 +57,9 @@ Shader"Custom/TestShader"
 
         float4 FragmentFunction(const Varyings input) : SV_Target
         {
-            return _Color * float4((input.positionWS.x + 1) / 2, (input.positionWS.y + 1) / 2, (input.positionWS.z + 1) / 2, 1);
+            //return _Color * float4((input.positionWS.x + 1) / 2, (input.positionWS.y + 1) / 2, (input.positionWS.z + 1) / 2, 1);
             //return _Color * clamp(input.positionWS.x, 0, 1);
+            return _Color * float4(abs(input.positionWS),1);
         }
 
 
