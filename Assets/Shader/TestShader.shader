@@ -33,7 +33,7 @@ Shader"Custom/TestShader"
         {
             float4 positionHCS : SV_POSITION;
             float3 normalWS : TEXCOORD0;
-
+            float3 positionWS : TEXCOORD1;
         };
 
         CBUFFER_START(UnityPerMaterial)
@@ -44,8 +44,14 @@ Shader"Custom/TestShader"
         Varyings VertexFunction(const Attributes input)
         {
             Varyings output;
-            output.positionHCS = TransformObjectToHClip(input.positionOS);
+            // M = model, V = view, P = projection
+            output.positionHCS = mul(UNITY_MATRIX_P, mul(UNITY_MATRIX_V, mul(UNITY_MATRIX_M, float4(input.positionOS,1))));
+            //output.positionHCS = TransformObjectToHClip(input.positionOS);
+            //output.positionWS = mul(UNITY_MATRIX_M,input.positionOS);
             //output.positionWS = TransformObjectToWorld(input.positionOS);
+
+            // Inverse matrix.
+            //const float3 os = mul(UNITY_MATRIX_I_M, output.positionWS);
             
             // In world coordinates = changes when rotated
             output.normalWS = TransformObjectToWorldNormal(input.normalOS);
