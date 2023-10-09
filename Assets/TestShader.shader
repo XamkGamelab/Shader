@@ -32,7 +32,7 @@ Shader"Custom/TestShader"
         struct Varyings // Or use v2f, whichever you find intuitive in the future.
         {
             float4 positionHCS : SV_POSITION;
-            float3 positionWS : TEXCOORD0;
+            float3 normalWS : TEXCOORD0;
 
         };
 
@@ -48,10 +48,10 @@ Shader"Custom/TestShader"
             //output.positionWS = TransformObjectToWorld(input.positionOS);
             
             // In world coordinates = changes when rotated
-            output.positionWS = TransformObjectToWorldNormal(input.normalOS);
+            output.normalWS = TransformObjectToWorldNormal(input.normalOS);
 
             // In own coordinates = doesn't change when rotated
-            //output.positionWS = input.normalOS;
+            //output.normalWS = input.normalOS;
             return output;
         }
 
@@ -59,7 +59,7 @@ Shader"Custom/TestShader"
         {
             //return _Color * float4((input.positionWS.x + 1) / 2, (input.positionWS.y + 1) / 2, (input.positionWS.z + 1) / 2, 1);
             //return _Color * clamp(input.positionWS.x, 0, 1);
-            return _Color * float4(abs(input.positionWS),1);
+            return _Color * float4(abs(input.normalWS),1);
         }
 
 
