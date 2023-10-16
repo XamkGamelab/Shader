@@ -8,8 +8,7 @@ Shader "Custom/BlinnPhong"
     SubShader
     {
         Tags { "RenderType"="Opaque" "RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry"}
-        
-
+            
         Pass{
             Name "OmaPass"
             Tags
@@ -68,7 +67,7 @@ Shader "Custom/BlinnPhong"
             const float3 viewDir = GetWorldSpaceNormalizeViewDir(input.positionWS);
             const float3 halfwayVector = normalize(mainLight.direction + viewDir);
             const float3 specLight = pow(saturate(dot(input.normalWS, halfwayVector)), _Shininess) * mainLight.color;
-            float4 color = float4((ambientLight + diffuse + specLight) * _Color, 1);
+            float4 color = float4((ambientLight + diffuse + specLight *10) * _Color, 1);
             return color;
         }
 
@@ -78,6 +77,47 @@ Shader "Custom/BlinnPhong"
         }
         
         ENDHLSL    
-        } 
+        }
+
+        Pass
+        {
+        Name "Depth"
+        Tags { "LightMode" = "DepthOnly" }
+    
+        Cull Back
+        ZTest LEqual
+        ZWrite On
+        ColorMask R
+    
+        HLSLPROGRAM
+    
+        #pragma vertex DepthVert
+        #pragma fragment DepthFrag
+
+        // PITÄÄ OLLA RELATIVE PATH TIEDOSTOON!!!
+        #include "Common/DepthOnly.hlsl"
+
+        ENDHLSL
+
+        }
+        
+        Pass
+        {
+        Name "Normals"
+        Tags { "LightMode" = "DepthNormalsOnly" }
+    
+        Cull Back
+        ZTest LEqual
+        ZWrite On
+    
+        HLSLPROGRAM
+    
+        #pragma vertex DepthNormalsVert
+        #pragma fragment DepthNormalsFrag
+
+        #include "Common/DepthNormalsOnly.hlsl"
+    
+        ENDHLSL
+        }
     }
 }
