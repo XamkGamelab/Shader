@@ -3,17 +3,13 @@ Shader "Custom/TextureShader"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _SpeedX ("SpeedX", Float) = 0
+        _SpeedY ("SpeedY", Float) = 0
     }
     SubShader
     {
         Tags { "RenderType"="Opaque" "RenderPipeline" = "UniversalPipeline" "Queue" = "Geometry" }
-        
-        HLSLINCLUDE
-
-        
-            
-        ENDHLSL
-        
+                
         Pass
         {
             
@@ -28,23 +24,20 @@ Shader "Custom/TextureShader"
             SAMPLER(sampler_MainTex);
             
             CBUFFER_START(UnityPerMaterial)
-            float4 _Color;
-            float _Shininess;
             float4 _MainTex_ST;
+            float _SpeedX;
+            float _SpeedY;
             CBUFFER_END
 
             struct Attributes
             {
                 float4 positionOS : POSITION;
-                float3 normalOS : NORMAL;
                 float2 uv : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
-                float3 normalWS : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
                 float2 uv : TEXCOORD2;
             };
             
@@ -52,9 +45,7 @@ Shader "Custom/TextureShader"
             {
                 Varyings output;
                 output.positionHCS = TransformObjectToHClip(input.positionOS.xyz);
-                output.positionWS = TransformObjectToWorld(input.positionOS.xyz);
-                output.normalWS = TransformObjectToWorldNormal(input.normalOS);
-                output.uv = input.uv * _MainTex_ST.xy + _MainTex_ST.zw + _Time.y * float2(0.5,0.1);
+                output.uv = input.uv * _MainTex_ST.xy + _MainTex_ST.zw + _Time.y * float2(_SpeedX, _SpeedY);
                 return output;
             }
             
