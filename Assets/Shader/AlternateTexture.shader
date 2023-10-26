@@ -5,6 +5,7 @@ Shader "Custom/AlternateTexture"
         _MainTex ("Texture", 2D) = "white" {}
         _SecTex ("Texture2", 2D) = "white" {}
         _CutPoint ("Cut point", Range(0,1)) = 0.5
+        _BlendAmount ("Blend amount", Range(0,1)) = 0.5
         _SpeedX ("SpeedX", Float) = 0
         _SpeedY ("SpeedY", Float) = 0
     }
@@ -34,6 +35,7 @@ Shader "Custom/AlternateTexture"
             float _SpeedY;
             float4 _SecTex_ST;
             float _CutPoint;
+            float _BlendAmount;
             CBUFFER_END
 
             struct appdata
@@ -61,8 +63,9 @@ Shader "Custom/AlternateTexture"
             {
                 float4 tex1 = tex2D(_MainTex, input.uv);
                 float4 tex2 = tex2D(_SecTex, input.uv);
+                float4 texFin = lerp(tex1, tex2, _BlendAmount);
                 
-                float4 result = lerp(tex2, tex1, _CutPoint < (input.uv.x * _SecTex_ST.x + input.uv.y * _SecTex_ST.y) % 1);
+                float4 result = lerp(texFin, tex1, _CutPoint < (input.uv.x * _SecTex_ST.x + input.uv.y * _SecTex_ST.y) % 1);
                 
                 return result;
             }
