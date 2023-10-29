@@ -21,7 +21,7 @@ Shader "Custom/AlternateTexture"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            //#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             //TEXTURE2D(_MainTex);
             //SAMPLER(sampler_MainTex);
@@ -61,9 +61,9 @@ Shader "Custom/AlternateTexture"
             
             float4 frag(v2f input) : SV_Target
             {
-                float4 tex1 = tex2D(_MainTex, input.uv);
-                float4 tex2 = tex2D(_SecTex, input.uv);
-                float4 texFin = lerp(tex1, tex2, _BlendAmount);
+                const float4 tex1 = tex2D(_MainTex, input.uv);
+                const float4 tex2 = tex2D(_SecTex, input.uv);
+                const float4 texFin = lerp(tex1, tex2, _BlendAmount);
                 
                 float4 result = lerp(texFin, tex1, _CutPoint < (input.uv.x * _SecTex_ST.x + input.uv.y * _SecTex_ST.y) % 1);
                 
