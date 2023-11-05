@@ -55,7 +55,7 @@ Shader "Custom/ProximityTexture"
                 
                 float distance = length(_PlayerPosition - input.positionWS);
                 distance = saturate(1 - distance / _DistanceAttenuation); // = clamp(distance, 0, 1);
-                return lerp(0, (sin(distance * 30 + _Time.z * 2)+ 1) * 0.5f, distance);
+                return lerp(0, (sin(distance * 30 + _Time.z * 2)+ 1) * 0.5f * color1, distance);
             }
             ENDHLSL
         }
