@@ -78,7 +78,7 @@ Shader "Custom/BlinnPhongNormalMap"
                 const float3 halfwayDir = normalize(mainLight.direction + viewDir);
                 
                 const float3 specularLight = pow(saturate(dot(input.normalWS, halfwayDir)), _Shininess) * mainLight.color;
-                return float4((ambientLight + diffuseLight + specularLight * 10 /* <-- vaihtoehtoinen 10 */) * color.rgb, 1);
+                return float4((ambientLight + diffuseLight + specularLight * 10 /* <-- optional 10 */) * color.rgb, 1);
             }
             
             float4 frag (Varyings input) : SV_TARGET
@@ -111,7 +111,7 @@ Shader "Custom/BlinnPhongNormalMap"
         #pragma vertex DepthVert
         #pragma fragment DepthFrag
 
-        // PITÄÄ OLLA RELATIVE PATH TIEDOSTOON!!!
+        // HAS TO HAVE RELATIVE PATH FILE!!!
         #include "../Common/DepthOnly.hlsl"
 
         ENDHLSL
