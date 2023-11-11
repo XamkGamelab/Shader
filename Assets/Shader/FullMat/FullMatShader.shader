@@ -101,7 +101,7 @@ Shader "Custom/FullMatShader"
                 half3 viewDirTS : TEXCOORD5;
                 DECLARE_LIGHTMAP_OR_SH(staticLightmapUV, sh, 6);
                 #if defined(DYNAMICLIGHTMAP_ON)
-                float2  dynamicLightmapUV : TEXCOORD7;
+                float2  dynamicLightmapUV : TEXCOORD6;
                 #endif
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
