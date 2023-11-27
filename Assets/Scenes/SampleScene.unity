@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.17963158, g: 0.22491983, b: 0.30648035, a: 1}
+  m_IndirectSpecularColor: {r: 0.17962766, g: 0.22491509, b: 0.30647755, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1400,12 +1400,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3cc6af305968e5c459a39b7fa462cfd9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UVShader: {fileID: 7200000, guid: 6eafcf75ba0db3f40a8826cd42180e80, type: 3}
-  VisualizationMaterial: {fileID: 2100000, guid: a7b949e07f6cceb4287b8444f9123bef,
-    type: 2}
+  GOLShader: {fileID: 7200000, guid: 6eafcf75ba0db3f40a8826cd42180e80, type: 3}
+  LifeMaterial: {fileID: 2100000, guid: a7b949e07f6cceb4287b8444f9123bef, type: 2}
   startSeed: 0
+  edgeWrap: 0
   cellColor: {r: 1, g: 0, b: 0, a: 0}
-  updateSpeed: 0
+  updateSpeed: 3
 --- !u!1 &1414451450
 GameObject:
   m_ObjectHideFlags: 0

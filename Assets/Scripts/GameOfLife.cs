@@ -1,11 +1,10 @@
-using System;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
 public class GameOfLife : MonoBehaviour
 {
-    [SerializeField] private ComputeShader UVShader;
-    [SerializeField] private Material VisualizationMaterial;
+    [SerializeField] private ComputeShader GOLShader;
+    [SerializeField] private Material LifeMaterial;
 
     private enum Seed
     {
@@ -16,50 +15,106 @@ public class GameOfLife : MonoBehaviour
     }
 
     [SerializeField] private Seed startSeed;
+    [SerializeField] private bool edgeWrap;
 
     [SerializeField] private Color cellColor = Color.red;
-    [SerializeField][Range(.05f,3f)] private float updateSpeed;
+    [SerializeField][Range(0f,3f)] private float updateSpeed;
     private float timer = 0;
-    
-    private RenderTexture UVTextureOne;
-    private RenderTexture UVTextureTwo;
+    private bool onState1 = true;
 
-    private static int OneKernel;
-    private static int TwoKernel;
+    private static readonly Vector2Int TexSize = new Vector2Int(512, 512);
     
-    private static int FullTexKernel;
-    private static int RPentKernel;
-    private static int AcornKernel;
-    private static int GunKernel;
+    private RenderTexture State1;
+    private RenderTexture State2;
+
+    private static int Update1Kernel;
+    private static int Update2Kernel;
+    private static int SeedKernel;
     
+    // Property ID
     private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
-    private static readonly int UVMap = Shader.PropertyToID("UVMap");
+    private static readonly int CellColor = Shader.PropertyToID("CellColor");
+    private static readonly int TextureSize = Shader.PropertyToID("TextureSize");
+    private static readonly int State1Tex = Shader.PropertyToID("State1");
+    private static readonly int State2Tex = Shader.PropertyToID("State2");
 
     void Start()
     {
-        OneKernel = UVShader.FindKernel("Update1");
-        TwoKernel = UVShader.FindKernel("Update2");
-
-        FullTexKernel = UVShader.FindKernel("InitFullTexture");
-        RPentKernel = UVShader.FindKernel("InitRPentomino");
-        AcornKernel = UVShader.FindKernel("InitAcorn");
-        GunKernel = UVShader.FindKernel("InitGun");
-
-        UVTextureOne = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
+        State1 = new RenderTexture(TexSize.x, TexSize.y, 0, DefaultFormat.LDR)
         {
+            filterMode = FilterMode.Point,
             enableRandomWrite = true
         };
-        UVTextureTwo = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
+
+        State2 = new RenderTexture(TexSize.x, TexSize.y, 0, DefaultFormat.LDR)
         {
+            filterMode = FilterMode.Point,
             enableRandomWrite = true
         };
+        LifeMaterial.SetTexture(BaseMap, State1);
         
-        UVTextureOne.Create();
-        VisualizationMaterial.SetTexture(BaseMap, UVTextureOne);
+        Update1Kernel = GOLShader.FindKernel("Update1");
+        Update2Kernel = GOLShader.FindKernel("Update2");
+
+        SeedKernel = startSeed switch
+        {
+            Seed.FullTexture => GOLShader.FindKernel("InitFullTexture"),
+            Seed.RPentomino => GOLShader.FindKernel("InitRPentomino"),
+            Seed.Acorn => GOLShader.FindKernel("InitAcorn"),
+            Seed.GosperGun => GOLShader.FindKernel("InitGun"),
+            _ => 0
+        };
         
-        UVShader.SetTexture(OneKernel, UVMap, UVTextureOne);
+        GOLShader.SetTexture(Update1Kernel, State1Tex, State1);
+        GOLShader.SetTexture(Update1Kernel, State2Tex, State2);
         
-        UVShader.Dispatch(OneKernel, 512 / 8, 512 / 8, 1);
+        GOLShader.SetTexture(Update2Kernel, State1Tex, State1);
+        GOLShader.SetTexture(Update2Kernel, State2Tex, State2);
+
+        GOLShader.SetTexture(SeedKernel, State1Tex, State1);
+
+        //GOLShader.SetVector("CellColor", cellColor);
+        GOLShader.SetVector(CellColor, cellColor);
+        
+        // bonus
+        GOLShader.SetVector(TextureSize, new Vector4(TexSize.x, TexSize.y));
+        
+        GOLShader.Dispatch(SeedKernel,TexSize.x / 8, TexSize.y / 8, 1);
+        
+        
+        
+        // if (startSeed == Seed.FullTexture)
+        // {
+        //     SeedKernel = GOLShader.FindKernel("InitFullTexture");
+        // }
+        // else if (startSeed == Seed.RPentomino)
+        // {
+        //     SeedKernel = GOLShader.FindKernel("InitRPentomino");
+        // }
+        // else if (startSeed == Seed.Acorn)
+        // {
+        //     SeedKernel = GOLShader.FindKernel("InitAcorn");
+        // }
+        // else if (startSeed == Seed.GosperGun)
+        // {
+        //     SeedKernel = GOLShader.FindKernel("InitGun");
+        // }
+
+        // UVTextureOne = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
+        // {
+        //     enableRandomWrite = true
+        // };
+        // UVTextureTwo = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
+        // {
+        //     enableRandomWrite = true
+        // };
+        //
+        // UVTextureOne.Create();
+        // VisualizationMaterial.SetTexture(BaseMap, UVTextureOne);
+        //
+        // GOLShader.SetTexture(SeedKernel, State1, UVTextureOne);
+        //
+        // GOLShader.Dispatch(SeedKernel, 512 / 8, 512 / 8, 1);
     }
 
     private void Update()
@@ -67,17 +122,23 @@ public class GameOfLife : MonoBehaviour
         timer += Time.deltaTime;
         if (timer > updateSpeed)
         {
+            onState1 = !onState1;
+            
+            LifeMaterial.SetTexture(BaseMap, onState1 ? State1 : State2);
+            
             timer = 0;
         }
     }
 
     private void OnDisable()
     {
-        UVTextureOne.Release();
+        State1.Release();
+        State2.Release();
     }
 
     private void OnDestroy()
     {
-        UVTextureOne.Release();
+        State1.Release();
+        State2.Release();
     }
 }

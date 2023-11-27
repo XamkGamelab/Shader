@@ -1,40 +1,65 @@
 #pragma kernel Update1
 
 Texture2D<float4> _BaseMap;
-RWTexture2D<float4> UVMap;
+RWTexture2D<float4> State1;
+RWTexture2D<float4> State2;
 
-// 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
-// 2. Any live cell with two or three live neighbours lives on to the next generation.
-// 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-// 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction
+cbuffer ColorBuffer : register(b0){
+    float4 CellColor;
+    float4 TextureSize;
+}
 
 [numthreads(8,8,1)]
 void Update1 (uint3 id : SV_DispatchThreadID)
 {
-
-    float2 uv = id.xy / 512.0f;
-
-    float4 color = float4(uv.x, uv.y, 0, 1.0f);
-    
-    UVMap[id.xy] = color;
-    //Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    //State2[dispatchThreadID.xy] = State1[dispatchThreadID.xy];
 }
 
 #pragma kernel Update2
-
 [numthreads(8,8,1)]
 void Update2 (uint3 id : SV_DispatchThreadID)
 {
-
-    float2 uv = id.xy / 512.0f;
-
-    float4 color = float4(uv.x, uv.y, 0, 1.0f);
-    
-    UVMap[id.xy] = color;
-    //Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    //State1[dispatchThreadID.xy] = State2[dispatchThreadID.xy];
 }
 
+bool CellUpdater ()
+{
+    // 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+    // 2. Any live cell with two or three live neighbours lives on to the next generation.
+    // 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+    // 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+    // bool currCellState = false;
+    // if(state == CellColor)
+    // {
+    //     currCellState = true;
+    // }
+    //
+    // int neighborCount = 0;
+    //
+    // for (int dx = -1; dx <= 1; dx++)
+    // {
+    //     for(int dy = -1; dy <= 1; dy++)
+    //     {
+    //         if (dx == 0 && dy == 0)
+    //         {
+    //             continue;
+    //         }
+    //         bool neighborState = false;
+    //         if(true)
+    //         {
+    //             
+    //         }
+    //         
+    //         neighborCount += (neighborState ? 1 : 0);
+    //     }
+    // }
+    return true;
+}
 
+bool IsCellAlive(float4 cell)
+{
+    return cell.x + cell.y + cell.z > 0;
+}
 
 // FullTexture Seed
 #pragma kernel InitFullTexture
@@ -42,7 +67,7 @@ void Update2 (uint3 id : SV_DispatchThreadID)
 void InitFullTexture(uint3 id : SV_DispatchThreadID)
 {
     if (id.x % 7 == 0 || id.y % 3 == 0)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
 }
 
 // R-Pentomino Seed
@@ -51,15 +76,15 @@ void InitFullTexture(uint3 id : SV_DispatchThreadID)
 void InitRPentomino(uint3 id : SV_DispatchThreadID)
 {
     if (id.x == 256 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 255 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 256 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 257 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 256 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
 }
 
 // Acorn Seed
@@ -68,19 +93,19 @@ void InitRPentomino(uint3 id : SV_DispatchThreadID)
 void InitAcorn(uint3 id : SV_DispatchThreadID)
 {
     if (id.x == 256 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 257 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 254 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 258 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 259 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 254 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 253 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
 }
 
 // Gosper Gun Seed
@@ -89,77 +114,77 @@ void InitAcorn(uint3 id : SV_DispatchThreadID)
 void InitGun(uint3 id : SV_DispatchThreadID)
 {
     if (id.x == 256 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 255 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 254 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 255 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 255 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 254 && id.y == 258)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 253 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 252 && id.y == 259)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 252 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 251 && id.y == 259)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 251 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 250 && id.y == 258)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 250 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 249 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 249 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 249 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 240 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 240 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 239 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 239 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 259 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 259 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 259 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 260 && id.y == 255)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 260 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 260 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 261 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 261 && id.y == 252)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 263 && id.y == 257)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 263 && id.y == 256)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 263 && id.y == 252)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 263 && id.y == 251)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 273 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 273 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 274 && id.y == 254)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
     if (id.x == 274 && id.y == 253)
-        State1[id.xy] = CellColour;
+        State1[id.xy] = CellColor;
 }
 
 
