@@ -9,51 +9,76 @@ cbuffer ColorBuffer : register(b0){
     float4 TextureSize;
 }
 
+bool CellUpdater(float4 cell, uint2 texCoord, RWTexture2D<float4> state);
+bool IsCellAlive(float4 cell);
+
 [numthreads(8,8,1)]
 void Update1 (uint3 id : SV_DispatchThreadID)
 {
-    //State2[dispatchThreadID.xy] = State1[dispatchThreadID.xy];
+    // Use id to access the corresponding pixel in the texture
+    uint2 texCoord = id.xy;
+
+    // Fetch the current state of the cell
+    float4 cell = State1.Load(texCoord);
+
+    // Implement Game of Life rules in CellUpdater function
+    bool nextState = CellUpdater(cell, texCoord, State1);
+
+    // Set the new state in State2 texture
+    State2[texCoord] = nextState ? CellColor : float4(0, 0, 0, 1);
 }
 
 #pragma kernel Update2
 [numthreads(8,8,1)]
 void Update2 (uint3 id : SV_DispatchThreadID)
 {
-    //State1[dispatchThreadID.xy] = State2[dispatchThreadID.xy];
+    // Use id to access the corresponding pixel in the texture
+    uint2 texCoord = id.xy;
+
+    // Fetch the current state of the cell
+    float4 cell = State2.Load(texCoord);
+
+    // Implement Game of Life rules in CellUpdater function
+    bool nextState = CellUpdater(cell, texCoord, State2);
+
+    // Set the new state in State1 texture
+    State1[texCoord] = nextState ? CellColor : float4(0, 0, 0, 1);
 }
 
-bool CellUpdater ()
+bool CellUpdater(float4 cell, uint2 texCoord, RWTexture2D<float4> state)
 {
     // 1. Any live cell with fewer than two live neighbours dies, as if by underpopulation.
     // 2. Any live cell with two or three live neighbours lives on to the next generation.
     // 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
     // 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-    // bool currCellState = false;
-    // if(state == CellColor)
-    // {
-    //     currCellState = true;
-    // }
-    //
-    // int neighborCount = 0;
-    //
-    // for (int dx = -1; dx <= 1; dx++)
-    // {
-    //     for(int dy = -1; dy <= 1; dy++)
-    //     {
-    //         if (dx == 0 && dy == 0)
-    //         {
-    //             continue;
-    //         }
-    //         bool neighborState = false;
-    //         if(true)
-    //         {
-    //             
-    //         }
-    //         
-    //         neighborCount += (neighborState ? 1 : 0);
-    //     }
-    // }
-    return true;
+    
+    // Count live neighbors
+    int liveNeighbors = 0;
+    for (int dx = -1; dx <= 1; ++dx)
+    {
+        for (int dy = -1; dy <= 1; ++dy)
+        {
+            if (dx == 0 && dy == 0)
+                continue;
+
+            uint2 neighborCoord = texCoord + uint2(dx, dy);
+            
+            // Use IsCellAlive to check if the neighbor cell is alive
+            liveNeighbors += IsCellAlive(state.Load(neighborCoord));
+        }
+    }
+
+    // Apply Game of Life rules
+    if (IsCellAlive(cell))
+    {
+        // Rule 1 and 3
+        return liveNeighbors == 2 || liveNeighbors == 3;
+    }
+    else
+    {
+        // Rule 4
+        return liveNeighbors == 3;
+    }
 }
 
 bool IsCellAlive(float4 cell)

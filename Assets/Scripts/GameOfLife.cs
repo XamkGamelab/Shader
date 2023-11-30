@@ -45,12 +45,15 @@ public class GameOfLife : MonoBehaviour
             filterMode = FilterMode.Point,
             enableRandomWrite = true
         };
+        State1.Create();
 
         State2 = new RenderTexture(TexSize.x, TexSize.y, 0, DefaultFormat.LDR)
         {
             filterMode = FilterMode.Point,
             enableRandomWrite = true
         };
+        State2.Create();
+        
         LifeMaterial.SetTexture(BaseMap, State1);
         
         Update1Kernel = GOLShader.FindKernel("Update1");
@@ -73,7 +76,6 @@ public class GameOfLife : MonoBehaviour
 
         GOLShader.SetTexture(SeedKernel, State1Tex, State1);
 
-        //GOLShader.SetVector("CellColor", cellColor);
         GOLShader.SetVector(CellColor, cellColor);
         
         // bonus
@@ -81,40 +83,6 @@ public class GameOfLife : MonoBehaviour
         
         GOLShader.Dispatch(SeedKernel,TexSize.x / 8, TexSize.y / 8, 1);
         
-        
-        
-        // if (startSeed == Seed.FullTexture)
-        // {
-        //     SeedKernel = GOLShader.FindKernel("InitFullTexture");
-        // }
-        // else if (startSeed == Seed.RPentomino)
-        // {
-        //     SeedKernel = GOLShader.FindKernel("InitRPentomino");
-        // }
-        // else if (startSeed == Seed.Acorn)
-        // {
-        //     SeedKernel = GOLShader.FindKernel("InitAcorn");
-        // }
-        // else if (startSeed == Seed.GosperGun)
-        // {
-        //     SeedKernel = GOLShader.FindKernel("InitGun");
-        // }
-
-        // UVTextureOne = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
-        // {
-        //     enableRandomWrite = true
-        // };
-        // UVTextureTwo = new RenderTexture(512, 512, 0, DefaultFormat.LDR)
-        // {
-        //     enableRandomWrite = true
-        // };
-        //
-        // UVTextureOne.Create();
-        // VisualizationMaterial.SetTexture(BaseMap, UVTextureOne);
-        //
-        // GOLShader.SetTexture(SeedKernel, State1, UVTextureOne);
-        //
-        // GOLShader.Dispatch(SeedKernel, 512 / 8, 512 / 8, 1);
     }
 
     private void Update()
@@ -122,10 +90,13 @@ public class GameOfLife : MonoBehaviour
         timer += Time.deltaTime;
         if (timer > updateSpeed)
         {
-            onState1 = !onState1;
             
             LifeMaterial.SetTexture(BaseMap, onState1 ? State1 : State2);
             
+            int currentUpdateKernel = onState1 ? Update1Kernel : Update2Kernel;
+            GOLShader.Dispatch(currentUpdateKernel, TexSize.x / 8, TexSize.y / 8, 1);
+            
+            onState1 = !onState1;
             timer = 0;
         }
     }
