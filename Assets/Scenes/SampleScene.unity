@@ -1402,10 +1402,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GOLShader: {fileID: 7200000, guid: 6eafcf75ba0db3f40a8826cd42180e80, type: 3}
   LifeMaterial: {fileID: 2100000, guid: a7b949e07f6cceb4287b8444f9123bef, type: 2}
-  startSeed: 2
-  edgeWrap: 0
+  startSeed: 1
+  edgeWrap: 1
   cellColor: {r: 1, g: 0, b: 0, a: 0}
-  updateSpeed: 0.17
+  updateSpeed: 0
 --- !u!1 &1414451450
 GameObject:
   m_ObjectHideFlags: 0

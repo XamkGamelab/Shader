@@ -7,6 +7,7 @@ RWTexture2D<float4> State2;
 cbuffer ColorBuffer : register(b0){
     float4 CellColor;
     float4 TextureSize;
+    bool WrapBool;
 }
 
 bool CellUpdater(float4 cell, uint2 texCoord, RWTexture2D<float4> state);
@@ -32,16 +33,13 @@ void Update1 (uint3 id : SV_DispatchThreadID)
 [numthreads(8,8,1)]
 void Update2 (uint3 id : SV_DispatchThreadID)
 {
-    // Use id to access the corresponding pixel in the texture
+    // This is the same as above.
     uint2 texCoord = id.xy;
 
-    // Fetch the current state of the cell
     float4 cell = State2.Load(texCoord);
 
-    // Implement Game of Life rules in CellUpdater function
     bool nextState = CellUpdater(cell, texCoord, State2);
 
-    // Set the new state in State1 texture
     State1[texCoord] = nextState ? CellColor : float4(0, 0, 0, 1);
 }
 
@@ -62,6 +60,14 @@ bool CellUpdater(float4 cell, uint2 texCoord, RWTexture2D<float4> state)
                 continue;
 
             uint2 neighborCoord = texCoord + uint2(dx, dy);
+            
+            if (WrapBool)
+            {
+                // So, apparently, if I don't cast these to int, there is a rounding error,
+                // which breaks this. Like wwooooaaat???
+                neighborCoord.x = neighborCoord.x % (int)TextureSize.x;
+                neighborCoord.y = neighborCoord.y % (int)TextureSize.y;
+            }
             
             // Use IsCellAlive to check if the neighbor cell is alive
             liveNeighbors += IsCellAlive(state.Load(neighborCoord));

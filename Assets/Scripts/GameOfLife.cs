@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using UnityEngine.UIElements;
 
 public class GameOfLife : MonoBehaviour
 {
@@ -35,6 +36,7 @@ public class GameOfLife : MonoBehaviour
     private static readonly int BaseMap = Shader.PropertyToID("_BaseMap");
     private static readonly int CellColor = Shader.PropertyToID("CellColor");
     private static readonly int TextureSize = Shader.PropertyToID("TextureSize");
+    private static readonly int WrapBool = Shader.PropertyToID("WrapBool");
     private static readonly int State1Tex = Shader.PropertyToID("State1");
     private static readonly int State2Tex = Shader.PropertyToID("State2");
 
@@ -80,6 +82,7 @@ public class GameOfLife : MonoBehaviour
         
         // bonus
         GOLShader.SetVector(TextureSize, new Vector4(TexSize.x, TexSize.y));
+        GOLShader.SetBool(WrapBool, edgeWrap);
         
         GOLShader.Dispatch(SeedKernel,TexSize.x / 8, TexSize.y / 8, 1);
         
